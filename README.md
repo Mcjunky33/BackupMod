@@ -7,7 +7,7 @@ BackupMod is a powerful Minecraft server mod for easy, automatic, and manual bac
 ## Download
 
 - **[Modrinth](https://modrinth.com/mod/backup-mod)**
-- **[CurseForge](https://curseforge.com/minecraft/mc-mods/backup-mod)**
+- **[CurseForge](https://curseforge.com/minecraft/mc-mods/backup-manager-by-mcjunky33)**
 
 ---
 
