@@ -18,7 +18,7 @@ BackupMod is a powerful Minecraft server mod for easy, automatic, and manual bac
 - **Create and restore backups** with simple commands
 - **Automatic scheduled backups** (configurable per day)
 - **Backup limit & auto-delete** of oldest files
-- **Upload ZIP from URL** as backup
+- **Upload ZIP from URL (Upload Zip via direct download link. tip google drive doesn't work.)** 
 - **Rename backups**
 - **Exclude/include folders/files** from backups
 - **Language change command en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, more comming soon**
@@ -135,7 +135,7 @@ _Made with ♥ by Mcjunky33_
 - **Backups erstellen und wiederherstellen** per Command
 - **Automatische Backups** (mehrmals am Tag möglich)
 - **Backup-Limit & automatisches Löschen** der ältesten Sicherungen
-- **ZIP per URL herunterladen** als Backup
+- **ZIP per URL herunterladen (upload via directdownload link. tipp google drive funktioniert nicht.)** 
 - **Umbenennen von Backups**
 - **Dateien/Ordner ausschließen/inkludieren**
 - **Sprache umschaltbar en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, more comming soon**
