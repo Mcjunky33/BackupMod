@@ -6,8 +6,8 @@ BackupMod is a powerful Minecraft server mod for easy, automatic, and manual bac
 
 ## Download
 
-- **Modrinth:** [Link here]
-- **CurseForge:** [Link here]
+- **Modrinth:** [Not Uploaded]
+- **CurseForge:** [Not Uploaded]
 
 ---
 
