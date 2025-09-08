@@ -21,7 +21,7 @@ BackupMod is a powerful Minecraft server mod for easy, automatic, and manual bac
 - **Upload ZIP from URL** as backup
 - **Rename backups**
 - **Exclude/include folders/files** from backups
-- **Language change command**
+- **Language change command en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, more comming soon**
 - **Permission system** (only OPs or authorized users)
 - **Configurable logging**
 
@@ -87,8 +87,7 @@ All commands start with `/backup ...`
 ### Language
 
 - Default is English (`en_us`)
-- Change with `/backup lang <lang>`
-- Available: `en_us`, `de_de`, `fr_fr`, `es_es`, ...
+- Change with `/backup lang <lang> (en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, more comming soon)`
 
 ---
 
@@ -139,7 +138,7 @@ _Made with ♥ by Mcjunky33_
 - **ZIP per URL herunterladen** als Backup
 - **Umbenennen von Backups**
 - **Dateien/Ordner ausschließen/inkludieren**
-- **Sprache umschaltbar**
+- **Sprache umschaltbar en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, more comming soon**
 - **Rechteverwaltung für Backup-Kommandos**
 - **Log ein- und ausschaltbar**
 
@@ -205,7 +204,7 @@ Alle Befehle starten mit `/backup ...`
 ### Sprache
 
 - Standard ist Englisch (`en_us`)
-- Mit `/backup lang <lang>` kannst du z.B. Deutsch (`de_de`) einstellen.
+- Mit `/backup lang <lang> (en_us, en_gb, de_de, it_it, fr_fr, es_es, pl_pl, mehr kommt bald...) `
 
 ---
 
