@@ -31,7 +31,7 @@ public class BackupCommand {
     };
 
     private static final SuggestionProvider<CommandSourceStack> SUGGESTION_MAX = (ctx, builder) -> {
-        builder.suggest("Enter a number between 1 and 20");
+        builder.suggest("Enter a number between 1 and 100");
         return builder.buildFuture();
     };
 
