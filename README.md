@@ -32,7 +32,7 @@ BackupMod is a powerful Minecraft server mod for easy, automatic, and manual bac
 
 ### Installation
 
-1. Download the mod (`backupmod-x.x.x.jar`)
+1. Download the mod (`backupmod-0.2-1.21.8.jar`)
 2. Place it in your server’s `mods` folder
 3. Start the server – done!
 
@@ -149,7 +149,7 @@ _Made with ♥ by Mcjunky33_
 
 ### Installation
 
-1. Mod herunterladen (`backupmod-x.x.x.jar`)
+1. Mod herunterladen (`backupmod-0.2-1.21.8.jar`)
 2. In den `mods`-Ordner des Servers kopieren
 3. Server starten – fertig!
 
