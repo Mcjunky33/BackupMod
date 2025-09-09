@@ -223,6 +223,9 @@ public class BackupManager {
                 writeLog(savedMsg);
                 System.out.println(savedMsg);
 
+                // <<< HIER: MaxBackup-Limit prüfen und ggf. alte löschen!
+                deleteOldBackupsIfNeeded();
+
             } catch (Exception e) {
                 broadcastAllPlayers(server, LangManager.tr("backup.failed", e.getMessage()), ChatFormatting.RED);
                 writeLog("[BackupMod] Backup failed: " + e.getMessage());

@@ -19,10 +19,11 @@ public class BackupScheduler {
     private static LocalDateTime lastBackupTime = null;
     private static double lastIntervalSeconds = 36.0 * 60;
 
-    // Erweiterung: speichere verbleibende Zeit bis zum nächsten Backup beim Shutdown
+    // Timer-Status: wird regelmäßig gespeichert!
     private static long secondsRemaining = -1; // -1 = nicht gesetzt
+    private static int tickCounter = 0; // Ticks seit dem letzten Timer-Update
 
-    private static void saveLastBackupTime() {
+    private static void saveScheduleState() {
         File file = new File(SCHEDULE_FILE);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("lastBackupTime: " + (lastBackupTime == null ? "" : lastBackupTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)) + "\n");
@@ -35,7 +36,7 @@ public class BackupScheduler {
         }
     }
 
-    private static void loadLastBackupTime() {
+    private static void loadScheduleState() {
         File file = new File(SCHEDULE_FILE);
         if (!file.exists()) return;
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -89,8 +90,9 @@ public class BackupScheduler {
         lastBackupTime = LocalDateTime.now();
         isDebugTimerActive = false;
         debugSeconds = 0;
-        secondsRemaining = -1;
-        saveLastBackupTime();
+        secondsRemaining = (long) lastIntervalSeconds;
+        tickCounter = 0;
+        saveScheduleState();
     }
 
     public static void setDebugTimer(int hours, int minutes, int seconds, MinecraftServer server) {
@@ -99,23 +101,15 @@ public class BackupScheduler {
         debugSeconds = totalSeconds;
         lastBackupTime = LocalDateTime.now();
         secondsRemaining = -1;
-        saveLastBackupTime();
+        tickCounter = 0;
+        saveScheduleState();
         todayBackups.clear();
-        // Timer-Meldung handled von Command!
     }
 
     public static String getNextScheduledBackupTimerString() {
-        loadLastBackupTime();
-        LocalDateTime now = LocalDateTime.now();
-        if (lastBackupTime == null) {
-            lastBackupTime = now;
-            saveLastBackupTime();
-        }
-        Duration sinceLast = Duration.between(lastBackupTime, now);
-        long secondsPassed = sinceLast.getSeconds();
-
+        loadScheduleState();
         if (isDebugTimerActive) {
-            long secondsRem = debugSeconds - secondsPassed;
+            long secondsRem = debugSeconds;
             if (secondsRem <= 0) {
                 return "Debug timer finished! Backup will be executed automatically.";
             } else {
@@ -124,17 +118,17 @@ public class BackupScheduler {
                 long seconds = secondsRem % 60;
                 return String.format("%02dh %02dmin %02dsec", hours, minutes, seconds);
             }
-        } else if (secondsRemaining > 0) {
-            // Fortsetzung nach Server-Start mit Restzeit
-            long hours = secondsRemaining / 3600;
-            long minutes = (secondsRemaining % 3600) / 60;
-            long seconds = secondsRemaining % 60;
+        } else if (secondsRemaining >= 0) {
+            long secondsRem = secondsRemaining;
+            long hours = secondsRem / 3600;
+            long minutes = (secondsRem % 3600) / 60;
+            long seconds = secondsRem % 60;
             return String.format("%02dh %02dmin %02dsec", hours, minutes, seconds);
         } else {
+            // Falls -1, dann Intervall neu setzen (nur beim allerersten Start)
             int timesPerDay = Math.max(BackupConfig.autoBackupTimes, 1);
             double intervalSeconds = 1440.0 * 60 / timesPerDay;
-            long secondsRem = (long)intervalSeconds - secondsPassed;
-            if (secondsRem < 0) secondsRem = 0;
+            long secondsRem = (long) intervalSeconds;
             long hours = secondsRem / 3600;
             long minutes = (secondsRem % 3600) / 60;
             long seconds = secondsRem % 60;
@@ -142,57 +136,28 @@ public class BackupScheduler {
         }
     }
 
-    // Erweiterung: beim Shutdown aufrufen!
-    public static void saveRemainingTimeOnShutdown() {
-        loadLastBackupTime();
-        LocalDateTime now = LocalDateTime.now();
-        double intervalSeconds = lastIntervalSeconds;
-        long secondsPassed = 0;
-        if (lastBackupTime != null) {
-            secondsPassed = Duration.between(lastBackupTime, now).getSeconds();
-        }
-        long remaining = (long)intervalSeconds - secondsPassed;
-        if (remaining < 0) remaining = 0;
-        secondsRemaining = remaining;
-        saveLastBackupTime();
-    }
-
+    // Jede echte Sekunde (=20 Ticks) wird der Timer runtergezählt und gespeichert!
     public static void checkAndRunBackup(MinecraftServer server) {
-        loadLastBackupTime();
-        LocalDateTime now = LocalDateTime.now();
+        loadScheduleState();
         int timesPerDay = Math.max(BackupConfig.autoBackupTimes, 1);
-        double intervalSeconds = 1440.0 * 60 / timesPerDay;
+        lastIntervalSeconds = 1440.0 * 60 / timesPerDay;
 
-        if (BackupConfig.autoBackupEnabled != 1 || timesPerDay < 1) {
-            return;
+        // Nur beim allerersten Start setzt secondsRemaining das Intervall!
+        if (secondsRemaining < 0) {
+            secondsRemaining = (long) lastIntervalSeconds;
+            saveScheduleState();
         }
-
-        if (lastBackupTime == null) {
-            lastIntervalSeconds = intervalSeconds;
-            lastBackupTime = now;
-            saveLastBackupTime();
-        }
-
-        Duration sinceLast = Duration.between(lastBackupTime, now);
-        long secondsPassed = sinceLast.getSeconds();
 
         boolean doBackup = false;
+        tickCounter++;
 
-        if (isDebugTimerActive) {
-            if (secondsPassed >= debugSeconds) {
-                doBackup = true;
-            }
-        } else if (secondsRemaining > 0) {
-            // Server wurde neu gestartet und es gab Restzeit
-            secondsRemaining -= 1; // Tick = 1 Sekunde (wenn Tick)
-            if (secondsRemaining <= 0) {
-                doBackup = true;
-                secondsRemaining = -1; // zurücksetzen
-            } else {
-                saveLastBackupTime();
-            }
-        } else {
-            if (secondsPassed >= (long)intervalSeconds) {
+        // Zähle Timer nur jede echte Sekunde runter (20 Ticks = 1 Sekunde)
+        if (tickCounter >= 20) {
+            tickCounter = 0;
+            if (secondsRemaining > 0) {
+                secondsRemaining -= 1;
+                saveScheduleState();
+            } else if (secondsRemaining == 0) {
                 doBackup = true;
             }
         }
@@ -200,16 +165,11 @@ public class BackupScheduler {
         if (doBackup) {
             boolean success = runScheduledBackup(server);
             if (success) {
-                lastBackupTime = now;
-                todayBackups.add(now);
-
-                if (isDebugTimerActive) {
-                    isDebugTimerActive = false;
-                    debugSeconds = 0;
-                    lastIntervalSeconds = intervalSeconds;
-                }
-                secondsRemaining = -1;
-                saveLastBackupTime();
+                lastBackupTime = LocalDateTime.now();
+                todayBackups.add(lastBackupTime);
+                secondsRemaining = (long) lastIntervalSeconds;
+                tickCounter = 0;
+                saveScheduleState();
             }
         }
     }
@@ -239,6 +199,7 @@ public class BackupScheduler {
         debugSeconds = 0;
         lastIntervalSeconds = 36.0 * 60;
         secondsRemaining = -1;
+        tickCounter = 0;
     }
 
     public static boolean isDebugTimerActive() {

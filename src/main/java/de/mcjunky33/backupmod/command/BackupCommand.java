@@ -64,7 +64,7 @@ public class BackupCommand {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(
                     literal("backup")
-                            .requires(source -> hasPerm(source)) // <- NEU hinzugefügt!
+                            .requires(source -> hasPerm(source))
                             .then(literal("help")
                                     .executes(ctx -> {
                                         ctx.getSource().sendSuccess(() -> Component.literal(LangManager.tr("backup.help")), false);
@@ -371,7 +371,7 @@ public class BackupCommand {
                                                 return 1;
                                             })
                                     )
-                                    .then(argument("max", IntegerArgumentType.integer(1, 20))
+                                    .then(argument("max", IntegerArgumentType.integer(1, 100))
                                             .suggests(SUGGESTION_MAX)
                                             .executes(ctx -> {
                                                 if (!hasPerm(ctx.getSource())) {
@@ -379,8 +379,8 @@ public class BackupCommand {
                                                     return 0;
                                                 }
                                                 int max = IntegerArgumentType.getInteger(ctx, "max");
-                                                if (max < 1 || max > 20) {
-                                                    ctx.getSource().sendFailure(Component.literal("Please enter a number between 1 and 20."));
+                                                if (max < 1 || max > 100) {
+                                                    ctx.getSource().sendFailure(Component.literal("Please enter a number between 1 and 100."));
                                                     return 0;
                                                 }
                                                 BackupConfig.maxBackups = max;
@@ -569,6 +569,30 @@ public class BackupCommand {
                                                                     })
                                                             )
                                                     )
+                                            )
+                                    )
+                                    .then(literal("set.autobackup.value")
+                                            .then(argument("times", IntegerArgumentType.integer(1, 1440)) // <- Debug: bis 80 erlaubt!
+                                                    .executes(ctx -> {
+                                                        if (!hasPerm(ctx.getSource())) {
+                                                            ctx.getSource().sendFailure(Component.literal(LangManager.tr("error.permission")));
+                                                            return 0;
+                                                        }
+                                                        int times = IntegerArgumentType.getInteger(ctx, "times");
+                                                        if (times < 1 || times > 1440) {
+                                                            ctx.getSource().sendFailure(Component.literal("Please enter a number between 1 and 80."));
+                                                            return 0;
+                                                        }
+                                                        BackupScheduler.setAutoBackupTimes(times);
+                                                        ctx.getSource().sendSuccess(() -> Component.literal(
+                                                                "[BackupMod] Debug-AutoBackup value set to: " + times
+                                                        ), false);
+                                                        String timerString = BackupScheduler.getNextScheduledBackupTimerString();
+                                                        ctx.getSource().sendSuccess(() -> Component.literal(
+                                                                LangManager.tr("backup.autobackup_timer", timerString)
+                                                        ).withStyle(ChatFormatting.LIGHT_PURPLE), false);
+                                                        return 1;
+                                                    })
                                             )
                                     )
                                     .then(literal("create.schedulebackup")
